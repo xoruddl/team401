@@ -27,16 +27,22 @@ export default function LoginScreen() {
   const [submitting, setSubmitting] = useState(false);
 
   const handleKakaoLogin = async () => {
-    const redirectTo = Linking.createURL('/');
+    const redirectTo =
+      Platform.OS === 'web' ? window.location.origin + '/' : Linking.createURL('/');
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
         redirectTo,
         queryParams: { scope: 'profile_nickname profile_image' },
+        skipBrowserRedirect: true,
       },
     });
     if (error || !data.url) return;
-    await WebBrowser.openBrowserAsync(data.url);
+    if (Platform.OS === 'web') {
+      window.location.href = data.url;
+    } else {
+      await WebBrowser.openBrowserAsync(data.url);
+    }
   };
 
   const handleEmailSubmit = async () => {

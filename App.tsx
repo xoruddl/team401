@@ -1,7 +1,7 @@
 import 'react-native-url-polyfill/auto';
 import './global.css';
 import { useEffect } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
@@ -11,6 +11,7 @@ import Navigation from './src/navigation';
 
 export default function App() {
   useEffect(() => {
+    if (Platform.OS === 'web') return;
     const subscription = Linking.addEventListener('url', async ({ url }) => {
       const isOAuthCallback =
         url.includes('access_token') || url.includes('code=') || url.includes('error=');
