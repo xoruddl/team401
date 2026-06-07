@@ -39,6 +39,33 @@ export default function MyPageScreen({ navigation }: TabScreenProps<'MyPage'>) {
     ]);
   };
 
+  const handleDeleteAccount = async () => {
+    const confirm = () =>
+      new Promise<boolean>((resolve) => {
+        if (Platform.OS === 'web') {
+          resolve(window.confirm('정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.'));
+          return;
+        }
+        Alert.alert(
+          '회원 탈퇴',
+          '정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.',
+          [
+            { text: '취소', style: 'cancel', onPress: () => resolve(false) },
+            { text: '탈퇴하기', style: 'destructive', onPress: () => resolve(true) },
+          ],
+        );
+      });
+
+    if (!(await confirm())) return;
+
+    const { error } = await supabase.rpc('delete_user');
+    if (error) {
+      Alert.alert('오류', '탈퇴 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+      return;
+    }
+    await supabase.auth.signOut();
+  };
+
   if (loading) return <LoadingScreen />;
 
   const role = profile?.role ?? 'member';
@@ -91,6 +118,13 @@ export default function MyPageScreen({ navigation }: TabScreenProps<'MyPage'>) {
         onPress={handleLogout}
       >
         <Text className="text-base font-semibold text-[#e54848]">로그아웃</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        className="bg-white rounded-2xl p-5 shadow-sm shadow-black/[0.06]"
+        onPress={handleDeleteAccount}
+      >
+        <Text className="text-sm font-medium text-[#aaa]">회원 탈퇴</Text>
       </TouchableOpacity>
     </ScrollView>
   );
