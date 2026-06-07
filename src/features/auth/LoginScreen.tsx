@@ -15,7 +15,7 @@ import { supabase } from '../../lib/supabase';
 
 WebBrowser.maybeCompleteAuthSession();
 
-type Mode = 'signin' | 'signup';
+type Mode = 'signin' | 'signup' | 'verify';
 
 const inputClass = 'border border-[#ddd] rounded-lg p-3 text-[15px] bg-white';
 
@@ -53,20 +53,79 @@ export default function LoginScreen() {
     if (mode === 'signup' && p.length < 6) return Alert.alert('오류', '비밀번호는 6자 이상이어야 합니다.');
 
     setSubmitting(true);
-    const { error } =
-      mode === 'signup'
-        ? await supabase.auth.signUp({
-            email: e,
-            password: p,
-            options: { data: { name: nickname.trim() } },
-          })
-        : await supabase.auth.signInWithPassword({ email: e, password: p });
-    setSubmitting(false);
-
-    if (error) {
-      Alert.alert(mode === 'signup' ? '회원가입 실패' : '로그인 실패', error.message);
+    if (mode === 'signup') {
+      const { data, error } = await supabase.auth.signUp({
+        email: e,
+        password: p,
+        options: { data: { name: nickname.trim() } },
+      });
+      setSubmitting(false);
+      if (error) {
+        Alert.alert('회원가입 실패', error.message);
+      } else if (!data.session) {
+        setMode('verify');
+      }
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email: e, password: p });
+      setSubmitting(false);
+      if (error) Alert.alert('로그인 실패', error.message);
     }
   };
+
+  const handleResend = async () => {
+    const e = email.trim();
+    setSubmitting(true);
+    const { error } = await supabase.auth.resend({ type: 'signup', email: e });
+    setSubmitting(false);
+    if (error) {
+      Alert.alert('재발송 실패', error.message);
+    } else {
+      Alert.alert('발송 완료', '인증 메일을 다시 보냈습니다.');
+    }
+  };
+
+  if (mode === 'verify') {
+    return (
+      <KeyboardAvoidingView
+        className="flex-1 bg-white"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={{ flexGrow: 1, paddingHorizontal: 24, paddingVertical: 60, flex: 1, justifyContent: 'center' }}>
+          <View className="items-center gap-2 mb-12">
+            <Text className="text-4xl font-bold text-[#1a1a1a]">team401</Text>
+            <Text className="text-base text-[#888]">스노보드 동아리</Text>
+          </View>
+
+          <View className="items-center gap-4 mb-10">
+            <Text className="text-5xl">✉️</Text>
+            <Text className="text-xl font-bold text-[#1a1a1a]">이메일을 확인해주세요</Text>
+            <Text className="text-sm text-[#666] text-center leading-5">
+              <Text className="font-semibold text-[#1a1a1a]">{email.trim()}</Text>
+              {'\n'}으로 인증 메일을 보냈습니다.{'\n'}
+              메일의 링크를 클릭하면 가입이 완료됩니다.
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            className={`bg-[#1a1a1a] py-4 rounded-xl items-center mb-3 ${submitting ? 'opacity-60' : ''}`}
+            onPress={handleResend}
+            disabled={submitting}
+          >
+            <Text className="text-base font-semibold text-white">
+              {submitting ? '발송 중...' : '인증 메일 다시 보내기'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="items-center py-2"
+            onPress={() => setMode('signin')}
+          >
+            <Text className="text-sm text-[#1e88e5]">로그인 화면으로 돌아가기</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    );
+  }
 
   return (
     <KeyboardAvoidingView

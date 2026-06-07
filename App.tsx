@@ -18,7 +18,8 @@ export default function App() {
       if (!isOAuthCallback) return;
 
       try {
-        await WebBrowser.dismissBrowser();
+        // dismissBrowser is a no-op when no browser is open (e.g. email verification deep links)
+        try { await WebBrowser.dismissBrowser(); } catch {}
 
         const fragment = url.includes('#') ? url.split('#')[1] : url.split('?')[1] ?? '';
         const params = new URLSearchParams(fragment);
