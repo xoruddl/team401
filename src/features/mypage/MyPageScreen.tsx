@@ -1,4 +1,4 @@
-import { Alert, RefreshControl, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Platform, RefreshControl, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { useProfile } from './useProfile';
 import { Avatar } from '../../components/ui/Avatar';
@@ -20,7 +20,13 @@ export default function MyPageScreen({ navigation }: TabScreenProps<'MyPage'>) {
 
   const { refreshing, onRefresh } = usePullToRefresh(refetch);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('정말 로그아웃하시겠습니까?')) {
+        await supabase.auth.signOut();
+      }
+      return;
+    }
     Alert.alert('로그아웃', '정말 로그아웃하시겠습니까?', [
       { text: '취소', style: 'cancel' },
       {

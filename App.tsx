@@ -1,7 +1,7 @@
 import 'react-native-url-polyfill/auto';
 import './global.css';
 import { useEffect } from 'react';
-import { Alert, Platform } from 'react-native';
+import { Alert, Platform, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
@@ -49,10 +49,37 @@ export default function App() {
     return () => subscription.remove();
   }, []);
 
-  return (
+  const content = (
     <PreviewModeProvider>
       <Navigation />
       <StatusBar style="auto" />
     </PreviewModeProvider>
   );
+
+  if (Platform.OS !== 'web') return content;
+
+  return (
+    <View style={styles.webOuter}>
+      <View style={styles.webInner}>{content}</View>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  webOuter: {
+    flex: 1,
+    backgroundColor: '#d4d4d4',
+    alignItems: 'center',
+  },
+  webInner: {
+    flex: 1,
+    width: '100%' as unknown as number,
+    maxWidth: 430,
+    overflow: 'hidden',
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+  },
+});
