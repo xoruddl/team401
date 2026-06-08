@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { getServerNow, syncServerTime } from '../../lib/serverTime';
 import { Vote, VoteCategory, VoteEntry } from '../../types';
@@ -156,64 +156,50 @@ export function useVotes() {
     fetchVotes();
   };
 
+  const confirm = (message: string, onConfirm: () => void) => {
+    if (Platform.OS === 'web') {
+      // eslint-disable-next-line no-alert
+      if (window.confirm(message)) onConfirm();
+    } else {
+      Alert.alert('확인', message, [
+        { text: '아니요', style: 'cancel' },
+        { text: '확인', style: 'destructive', onPress: onConfirm },
+      ]);
+    }
+  };
+
   const leave = (entryId: string) => {
-    Alert.alert('참여 취소', '정말 참여를 취소하시겠습니까?', [
-      { text: '아니요', style: 'cancel' },
-      {
-        text: '취소하기',
-        style: 'destructive',
-        onPress: async () => {
-          const { error } = await supabase
-            .from('vote_entries')
-            .delete()
-            .eq('id', entryId);
-          if (error) {
-            Alert.alert('오류', '취소에 실패했습니다.');
-            return;
-          }
-          // 즉시 로컬 제거 — 본인 화면 바로 반영
-          setVotes((prev) =>
-            prev.map((v) => ({
-              ...v,
-              vote_entries: v.vote_entries.filter((e) => e.id !== entryId),
-            })),
-          );
-          // 다른 사용자의 queue_number 재배치 등을 백그라운드로 갱신
-          fetchVotes();
-        },
-      },
-    ]);
+    confirm('정말 참여를 취소하시겠습니까?', async () => {
+      const { error } = await supabase.from('vote_entries').delete().eq('id', entryId);
+      if (error) {
+        Alert.alert('오류', '취소에 실패했습니다.');
+        return;
+      }
+      setVotes((prev) =>
+        prev.map((v) => ({
+          ...v,
+          vote_entries: v.vote_entries.filter((e) => e.id !== entryId),
+        })),
+      );
+      fetchVotes();
+    });
   };
 
   const close = (voteId: string) => {
-    Alert.alert('투표 종료', '투표를 종료하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '종료',
-        style: 'destructive',
-        onPress: async () => {
-          await supabase
-            .from('votes')
-            .update({ closes_at: new Date().toISOString() })
-            .eq('id', voteId);
-          await fetchVotes();
-        },
-      },
-    ]);
+    confirm('투표를 종료하시겠습니까?', async () => {
+      await supabase
+        .from('votes')
+        .update({ closes_at: new Date().toISOString() })
+        .eq('id', voteId);
+      await fetchVotes();
+    });
   };
 
   const remove = (voteId: string) => {
-    Alert.alert('삭제', '투표를 삭제하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: async () => {
-          await supabase.from('votes').delete().eq('id', voteId);
-          await fetchVotes();
-        },
-      },
-    ]);
+    confirm('투표를 삭제하시겠습니까?', async () => {
+      await supabase.from('votes').delete().eq('id', voteId);
+      await fetchVotes();
+    });
   };
 
   const create = async (params: {

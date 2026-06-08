@@ -55,7 +55,8 @@ export function MyEntriesCard({
 }: Props) {
   const today = new Date();
   const todayStr = formatYmd(today);
-  const minimumDate = isMaster ? undefined : today;
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
   const isPast = (entry: SeasonEntry) => entry.in_date < todayStr;
 
   const [expanded, setExpanded] = useState(true);
@@ -122,7 +123,6 @@ export function MyEntriesCard({
 
   const renderEntryRow = (entry: SeasonEntry) => {
     const past = isPast(entry);
-    const inLocked = past && !isMaster;
     const canDelete = isMaster || !past;
 
     if (editingId === entry.id) {
@@ -132,8 +132,6 @@ export function MyEntriesCard({
             initialIn={parseYmd(entry.in_date)}
             initialOut={parseYmd(entry.out_date)}
             saving={saving}
-            minimumDate={inLocked ? undefined : minimumDate}
-            inLocked={inLocked}
             onCancel={onCancelEdit}
             onSave={(inDate, outDate) => onSave(entry.id, inDate, outDate, entry.user_id)}
           />
@@ -198,10 +196,9 @@ export function MyEntriesCard({
 
       {expanded && editingId === 'new' && (
         <EntryEditForm
-          initialIn={new Date()}
-          initialOut={new Date()}
+          initialIn={today}
+          initialOut={tomorrow}
           saving={saving}
-          minimumDate={minimumDate}
           onCancel={onCancelEdit}
           onSave={(inDate, outDate) => onSave('new', inDate, outDate)}
         />

@@ -10,8 +10,6 @@ type Props = {
   initialIn: Date;
   initialOut: Date;
   saving: boolean;
-  minimumDate?: Date;
-  inLocked?: boolean;
   onCancel: () => void;
   onSave: (inDate: Date, outDate: Date) => void;
 };
@@ -20,8 +18,6 @@ export function EntryEditForm({
   initialIn,
   initialOut,
   saving,
-  minimumDate,
-  inLocked = false,
   onCancel,
   onSave,
 }: Props) {
@@ -35,27 +31,25 @@ export function EntryEditForm({
       <TouchableOpacity
         className={dateRowClass}
         onPress={() => setShowInPicker(true)}
-        disabled={inLocked}
       >
         <Text className="text-[15px] text-[#555]">인 날짜</Text>
-        <View className="flex-row items-center gap-1.5">
-          <Text
-            className={`text-[15px] font-semibold ${inLocked ? 'text-[#999]' : 'text-[#1a1a1a]'}`}
-          >
-            {formatYmd(editIn)}
-          </Text>
-          {inLocked && <Text className="text-[11px] text-[#999]">잠김</Text>}
-        </View>
+        <Text className="text-[15px] font-semibold text-[#1a1a1a]">{formatYmd(editIn)}</Text>
       </TouchableOpacity>
-      {showInPicker && !inLocked && (
+      {showInPicker && (
         <DateTimePicker
           value={editIn}
           mode="date"
           display="spinner"
-          minimumDate={minimumDate}
           onChange={(_, d) => {
             setShowInPicker(false);
-            if (d) setEditIn(d);
+            if (d) {
+              setEditIn(d);
+              if (d >= editOut) {
+                const nextDay = new Date(d);
+                nextDay.setDate(nextDay.getDate() + 1);
+                setEditOut(nextDay);
+              }
+            }
           }}
         />
       )}

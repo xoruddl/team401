@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { SeasonEntry } from '../../types';
 import { formatYmd } from '../../utils/date';
@@ -99,17 +99,24 @@ export function useSeasonEntries(selectedDate: Date, isMaster: boolean = false) 
   };
 
   const deleteEntry = (id: string) => {
-    Alert.alert('삭제', '이 일정을 삭제할까요?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: async () => {
-          await supabase.from('season_entries').delete().eq('id', id);
-          await refetchAll();
-        },
-      },
-    ]);
+    const performDelete = async () => {
+      const { error } = await supabase.from('season_entries').delete().eq('id', id);
+      if (error) {
+        Alert.alert('오류', error.message);
+        return;
+      }
+      await refetchAll();
+    };
+
+    if (Platform.OS === 'web') {
+      // eslint-disable-next-line no-alert
+      if (window.confirm('이 일정을 삭제할까요?')) performDelete();
+    } else {
+      Alert.alert('삭제', '이 일정을 삭제할까요?', [
+        { text: '취소', style: 'cancel' },
+        { text: '삭제', style: 'destructive', onPress: performDelete },
+      ]);
+    }
   };
 
   return {

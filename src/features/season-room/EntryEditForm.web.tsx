@@ -8,8 +8,6 @@ type Props = {
   initialIn: Date;
   initialOut: Date;
   saving: boolean;
-  minimumDate?: Date;
-  inLocked?: boolean;
   onCancel: () => void;
   onSave: (inDate: Date, outDate: Date) => void;
 };
@@ -38,8 +36,6 @@ export function EntryEditForm({
   initialIn,
   initialOut,
   saving,
-  minimumDate,
-  inLocked = false,
   onCancel,
   onSave,
 }: Props) {
@@ -50,22 +46,22 @@ export function EntryEditForm({
     <View className="gap-3">
       <View className={dateRowClass}>
         <Text className="text-[15px] text-[#555]">인 날짜</Text>
-        {inLocked ? (
-          <View className="flex-row items-center gap-1.5">
-            <Text className="text-[15px] font-semibold text-[#999]">{formatYmd(editIn)}</Text>
-            <Text className="text-[11px] text-[#999]">잠김</Text>
-          </View>
-        ) : (
-          React.createElement('input', {
-            type: 'date',
-            value: toDateValue(editIn),
-            min: minimumDate ? toDateValue(minimumDate) : undefined,
-            onChange: (e: any) => {
-              if (e.target.value) setEditIn(fromDateValue(e.target.value));
-            },
-            style: webDateInputStyle,
-          })
-        )}
+        {React.createElement('input', {
+          type: 'date',
+          value: toDateValue(editIn),
+          onChange: (e: any) => {
+            if (e.target.value) {
+              const newIn = fromDateValue(e.target.value);
+              setEditIn(newIn);
+              if (e.target.value >= toDateValue(editOut)) {
+                const nextDay = new Date(newIn);
+                nextDay.setDate(nextDay.getDate() + 1);
+                setEditOut(nextDay);
+              }
+            }
+          },
+          style: webDateInputStyle,
+        })}
       </View>
       <View className={dateRowClass}>
         <Text className="text-[15px] text-[#555]">아웃 날짜</Text>
