@@ -5,7 +5,7 @@ import {
   Skateboard,
   SkateboardRental,
   SkateboardWithActiveRental,
-} from '../../types';
+} from '../../../types';
 
 export function useSkateboards() {
   const [items, setItems] = useState<SkateboardWithActiveRental[]>([]);

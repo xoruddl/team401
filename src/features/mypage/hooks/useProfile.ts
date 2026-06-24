@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../../../services/supabase';
 import { Profile, Role } from '../../../types';
-import { useAuth } from '../auth/hooks/useAuth';
+import { useAuth } from '../../auth/hooks/useAuth';
 import { usePreviewMode } from '../../../services/previewMode';
 
 export function useProfile() {
