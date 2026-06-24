@@ -5,8 +5,8 @@ import { Alert, Platform, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
-import { supabase } from './src/lib/supabase';
-import { PreviewModeProvider } from './src/lib/previewMode';
+import { supabase } from './src/services/supabase';
+import { PreviewModeProvider } from './src/services/previewMode';
 import Navigation from './src/navigation';
 
 export default function App() {
