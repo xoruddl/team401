@@ -3,21 +3,21 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import { useAuth } from '../features/auth/useAuth';
-import { useProfile } from '../features/mypage/useProfile';
-import LoginScreen from '../features/auth/LoginScreen';
-import PendingScreen from '../features/pending/PendingScreen';
-import HomeScreen from '../features/home/HomeScreen';
-import CommunityScreen from '../features/home/CommunityScreen';
-import MyPageScreen from '../features/mypage/MyPageScreen';
-import MemberManagementScreen from '../features/members/MemberManagementScreen';
-import SeasonRoomScreen from '../features/season-room/SeasonRoomScreen';
-import VoteScreen from '../features/vote/VoteScreen';
-import SkateboardRentalScreen from '../features/skateboard/SkateboardRentalScreen';
-import BoardScreen from '../features/board/BoardScreen';
-import NoticeScreen from '../features/notice/NoticeScreen';
+import { useAuth } from '../features/auth/hooks/useAuth';
+import { useProfile } from '../features/mypage/hooks/useProfile';
+import LoginScreen from '../pages/LoginScreen';
+import PendingScreen from '../pages/PendingScreen';
+import HomeScreen from '../pages/HomeScreen';
+import CommunityScreen from '../pages/CommunityScreen';
+import MyPageScreen from '../pages/MyPageScreen';
+import MemberManagementScreen from '../pages/MemberManagementScreen';
+import SeasonRoomScreen from '../pages/SeasonRoomScreen';
+import VoteScreen from '../pages/VoteScreen';
+import SkateboardRentalScreen from '../pages/SkateboardRentalScreen';
+import BoardScreen from '../pages/BoardScreen';
+import NoticeScreen from '../pages/NoticeScreen';
 
-import { LoadingScreen } from '../components/ui/LoadingScreen';
+import { LoadingScreen } from '../components/LoadingScreen';
 import { MainTabParamList, RootStackParamList } from './types';
 
 export type { MainTabParamList, RootStackParamList } from './types';
